@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace RestApiCore.Model
+namespace ServiceLayer
 {
     public enum Role
     {

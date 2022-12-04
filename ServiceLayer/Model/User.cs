@@ -1,16 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-//using Newtonsoft.Json;
+﻿//using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace RestApiCore.Model
+namespace ServiceLayer
 {
-    [Index(nameof(Email), IsUnique = true)]
-    public class User
+    //  [Index(nameof(Email), IsUnique = true)]
+    public class User : BaseEntity<User>, INonDeletable
     {
-        [Key]
-        public int Id { get; set; }
+          
         [Required]
         public string FirstName { get; set; }
         [Required]
@@ -33,9 +30,7 @@ namespace RestApiCore.Model
         public DateTime BirthDay { get; set; }
         public string? Mobile { get; set; }
         public bool IsActie { get; set; }
-        public bool IsDelete { get; set; }
-
-        public DateTime? CreationDate { get; set; }
+        public bool IsDeleted { get; set; }
 
         // If you don't want Articles data to appear in the resulting JSON
         [JsonIgnore]
@@ -44,7 +39,7 @@ namespace RestApiCore.Model
 
         public User()
         {
-            IsDelete = false;
+            IsDeleted = false;
             IsActie = true;
             CreationDate= DateTime.Now;
         }

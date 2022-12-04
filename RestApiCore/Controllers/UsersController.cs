@@ -3,36 +3,60 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.EntityFrameworkCore;
-using RestApiCore.Model;
+using ServiceLayer;
 
 namespace RestApiCore.Controllers
 {
-    [EnableCors("YourNamePolicy")]
+    //  [EnableCors("YourNamePolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
-        [HttpGet()]
 
-        public UsersController()
+
+        //public UsersController()
+        //{
+        //    _Logger = Logger ?? throw 
+        //}
+
+        //[HttpGet]
+        //public async Task<IActionResult> Get()
+        //{
+        //    using (var context = new RestApiDbContext())
+        //    {
+        //        return Ok(await context.Users.Where(p => p.IsDelete == false).ToListAsync());
+        //    }
+        //}
+
+
+        [HttpGet]
+        public async Task<IActionResult> Get([FromQuery] QueryParameters queryParameters)
         {
-            _Logger = Logger ?? throw 
-        }
-        public async Task<IActionResult> Get()
-        {
-            using (var context = new RestApiDbContext())
-            {
-                return Ok(await context.Users.Where(p => p.IsDelete == false).ToListAsync());
-            }
+            //using (var context = new DatabaseContext())
+            //{
+            //    IQueryable<User> users = context.Users
+            //        .Skip(queryParameters.Size * (queryParameters.Page - 1))
+            //        .Take(queryParameters.Size);
+            //    return Ok(await users.ToListAsync());
+            //}
+
+            var users = ServiceLayer.User.GetAllNonDeleted(queryParameters);
+
+            return Ok(await users);
+
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<User>> GetAll()
         {
-            using (var context = new RestApiDbContext())
-            {
-                return Ok(await context.Users.ToListAsync());
-            }
+            //using (var context = new DatabaseContext())
+            //{
+            //    return Ok(await context.Users.ToListAsync());
+            //}
+
+            //var users = ;
+            return Ok(await ServiceLayer.User.GetAllNonDeleted());
+
         }
 
 
@@ -53,7 +77,7 @@ namespace RestApiCore.Controllers
         //4-  [HttpGet,Route("{id}")]
         public async Task<IActionResult> Get(int Id)
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
                 var user = await context.Users.FindAsync(Id);
                 if (user != null)
@@ -69,9 +93,9 @@ namespace RestApiCore.Controllers
         [HttpGet("Details")]
         public async Task<IActionResult> GetDetails()
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
-                return Ok(await context.Users.Where(p => p.IsDelete == false).Select(p => new
+                return Ok(await context.Users.Where(p => p.IsDeleted == false).Select(p => new
                 {
 
                     p.Id,
@@ -90,9 +114,9 @@ namespace RestApiCore.Controllers
         [HttpGet("Role/{role}")]
         public async Task<IActionResult> GetRole(int role)
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
-                var user = await context.Users.Where(p => (int)p.Role == role && p.IsDelete == false).Select(p => new
+                var user = await context.Users.Where(p => (int)p.Role == role && p.IsDeleted == false).Select(p => new
                 {
                     p.Id,
                     p.Email,
@@ -113,9 +137,9 @@ namespace RestApiCore.Controllers
         [HttpGet("Email/{Email}")]
         public async Task<IActionResult> Get(string Email)
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
-                var user = await context.Users.Where(p => p.Email.Contains(Email) && p.IsDelete == false).ToListAsync();
+                var user = await context.Users.Where(p => p.Email.Contains(Email) && p.IsDeleted == false).ToListAsync();
                 if (user != null)
                 {
                     return Ok(user);
@@ -130,9 +154,9 @@ namespace RestApiCore.Controllers
         [HttpGet("search/{firstname}/{lastname}")]
         public async Task<IActionResult> Get(string firstname, string lastname)
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
-                var users = await context.Users.Where(p => (p.FirstName.Contains(firstname) || p.LastName.Contains(lastname)) && p.IsDelete == false).ToListAsync();
+                var users = await context.Users.Where(p => (p.FirstName.Contains(firstname) || p.LastName.Contains(lastname)) && p.IsDeleted == false).ToListAsync();
                 if (users.Count > 0)
                 {
                     return Ok(users);
@@ -146,9 +170,9 @@ namespace RestApiCore.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> GetByFirstnameAndLastname([FromQuery] string firstname, [FromQuery] string lastname)
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
-                var users = await context.Users.Where(p => (p.FirstName.Contains(firstname) || p.LastName.Contains(lastname)) && p.IsDelete == false).ToListAsync();
+                var users = await context.Users.Where(p => (p.FirstName.Contains(firstname) || p.LastName.Contains(lastname)) && p.IsDeleted == false).ToListAsync();
                 if (users.Count > 0)
                 {
                     return Ok(users);
@@ -161,9 +185,9 @@ namespace RestApiCore.Controllers
         [HttpGet("search/{role}")]
         public async Task<IActionResult> Get(int role, [FromQuery] string firstname)
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
-                var users = await context.Users.Where(p => (int)p.Role == role && p.FirstName.Contains(firstname) && p.IsDelete == false).ToListAsync();
+                var users = await context.Users.Where(p => (int)p.Role == role && p.FirstName.Contains(firstname) && p.IsDeleted == false).ToListAsync();
                 if (users.Count > 0)
                 {
                     return Ok(users);
@@ -179,7 +203,7 @@ namespace RestApiCore.Controllers
         {
             if (ModelState.IsValid)
             {
-                using (var context = new RestApiDbContext())
+                using (var context = new DatabaseContext())
                 {
                     try
                     {
@@ -193,7 +217,7 @@ namespace RestApiCore.Controllers
                     catch (Exception ex)
                     {
                         ModelState.AddModelError("Exception", ex.Message);
-                        return StatusCode(500,ModelState);
+                        return StatusCode(500, ModelState);
                     }
                 }
             }
@@ -207,7 +231,7 @@ namespace RestApiCore.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateUser(User user)
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
                 bool exist = context.Users.Any(p => p.Id == user.Id);
                 if (exist == true)
@@ -225,7 +249,7 @@ namespace RestApiCore.Controllers
         //[HttpPut("{Id}")]
         public async Task<IActionResult> ChangeActivation(int Id)
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
                 var updateuser = context.Users.Find(Id);
                 if (updateuser != null)
@@ -243,12 +267,12 @@ namespace RestApiCore.Controllers
         [HttpDelete("{Id}")]
         public async Task<IActionResult> DeleteUser(int Id)
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
                 var updateuser = context.Users.Find(Id);
                 if (updateuser != null)
                 {
-                    updateuser.IsDelete = true;
+                    updateuser.IsDeleted = true;
                     await context.SaveChangesAsync();
                     return Ok();
                     // Or return Ok(updateuser);  Or  return NoContent(); 

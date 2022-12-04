@@ -2,18 +2,18 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace RestApiCore.Model
+namespace ServiceLayer
 {
-    public class Article
+    public class Article : BaseEntity<Article> , INonDeletable
     {
-        public int Id { get; set; }
+       
         [Required]
-        public string Title { get; set; }
+        public string Title { get; set; }=String.Empty;
         [Required]
-        public string Text { get; set; }
+        public string Text { get; set; }=String.Empty;
 
-        public string Picture { get; set; }
-        public string DocumentPath { get; set; }
+        public string Picture { get; set; } = String.Empty;
+        public string DocumentPath { get; set; }=String.Empty;
 
 
         public bool IsActive { get; set; }
@@ -22,7 +22,6 @@ namespace RestApiCore.Model
 
         public int Visit { get; set; }
 
-        public DateTime CreationDate { get; set; }
         public int CategoryId { get; set; }
 
         // If you don't want Category data to appear in the resulting JSON

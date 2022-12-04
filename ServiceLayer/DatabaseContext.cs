@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace RestApiCore.Model
+namespace ServiceLayer
 {
-    public class RestApiDbContext : DbContext
+    public class DatabaseContext : DbContext
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -14,7 +14,7 @@ namespace RestApiCore.Model
         // Connect to server without Username&Pass:  "Data Source=.;Initial Catalog=RestApi;Integrated Security=SSPI;"
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Data Source=w;Initial Catalog=RestApi;Integrated Security=SSPI;");
+            optionsBuilder.UseSqlServer(@"Data Source=.;Initial Catalog=RestApi;Integrated Security=SSPI;");
         }
     }
 }

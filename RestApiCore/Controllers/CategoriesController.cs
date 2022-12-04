@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RestApiCore.Model;
+using ServiceLayer;
 
 namespace RestApiCore.Controllers
 {
@@ -13,7 +13,7 @@ namespace RestApiCore.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
                 var cats = context.Categories.ToList();
                 return Ok(cats);
@@ -25,7 +25,7 @@ namespace RestApiCore.Controllers
         [HttpGet("{Id}")]
         public IActionResult Get(int Id)
         {
-            using (var context = new RestApiDbContext())
+            using (var context = new DatabaseContext())
             {
                 var cat = context.Categories.Find(Id);
                 if (cat != null)
@@ -42,7 +42,7 @@ namespace RestApiCore.Controllers
         {
             if (ModelState.IsValid)
             {
-                using (var context = new RestApiDbContext())
+                using (var context = new DatabaseContext())
                 {
                     context.Categories.Add(cat);
                     context.SaveChanges();

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestApiCore", "RestApiCore\RestApiCore.csproj", "{7931D0FC-F31A-47BD-A3B8-753BF88022BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestApiCore", "RestApiCore\RestApiCore.csproj", "{7931D0FC-F31A-47BD-A3B8-753BF88022BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceLayer", "ServiceLayer\ServiceLayer.csproj", "{243B1703-F016-4FC8-8407-D14C647956E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{7931D0FC-F31A-47BD-A3B8-753BF88022BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7931D0FC-F31A-47BD-A3B8-753BF88022BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7931D0FC-F31A-47BD-A3B8-753BF88022BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{243B1703-F016-4FC8-8407-D14C647956E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{243B1703-F016-4FC8-8407-D14C647956E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{243B1703-F016-4FC8-8407-D14C647956E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{243B1703-F016-4FC8-8407-D14C647956E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

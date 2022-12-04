@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using RestApiCore.Model;
+using ServiceLayer;
 
 #nullable disable
 
-namespace RestApiCore.Migrations
+namespace ServiceLayer.Migrations
 {
-    [DbContext(typeof(RestApiDbContext))]
-    [Migration("20221111075900_initDB")]
-    partial class initDB
+    [DbContext(typeof(DatabaseContext))]
+    [Migration("20221204031858_Db_init")]
+    partial class Db_init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,7 +24,7 @@ namespace RestApiCore.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("RestApiCore.Model.Article", b =>
+            modelBuilder.Entity("ServiceLayer.Article", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -35,12 +35,12 @@ namespace RestApiCore.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreationDate")
+                    b.Property<DateTime?>("CreationDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("Date")
+                    b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("datetime2");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DocumentPath")
                         .IsRequired()
@@ -51,6 +51,9 @@ namespace RestApiCore.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastUpdateDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Picture")
                         .IsRequired()
@@ -79,7 +82,7 @@ namespace RestApiCore.Migrations
                     b.ToTable("Articles");
                 });
 
-            modelBuilder.Entity("RestApiCore.Model.Category", b =>
+            modelBuilder.Entity("ServiceLayer.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -87,11 +90,21 @@ namespace RestApiCore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<DateTime>("CreationDate")
+                    b.Property<DateTime?>("CreationDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastUpdateDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -102,7 +115,7 @@ namespace RestApiCore.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("RestApiCore.Model.User", b =>
+            modelBuilder.Entity("ServiceLayer.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -116,9 +129,13 @@ namespace RestApiCore.Migrations
                     b.Property<DateTime?>("CreationDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -127,9 +144,15 @@ namespace RestApiCore.Migrations
                     b.Property<bool>("IsActie")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastUpdateDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Mobile")
                         .HasColumnType("nvarchar(max)");
@@ -144,21 +167,18 @@ namespace RestApiCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
-
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("RestApiCore.Model.Article", b =>
+            modelBuilder.Entity("ServiceLayer.Article", b =>
                 {
-                    b.HasOne("RestApiCore.Model.Category", "Category")
-                        .WithMany("Articles")
+                    b.HasOne("ServiceLayer.Category", "Category")
+                        .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RestApiCore.Model.User", "Writer")
+                    b.HasOne("ServiceLayer.User", "Writer")
                         .WithMany("Articles")
                         .HasForeignKey("WriterId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -169,12 +189,7 @@ namespace RestApiCore.Migrations
                     b.Navigation("Writer");
                 });
 
-            modelBuilder.Entity("RestApiCore.Model.Category", b =>
-                {
-                    b.Navigation("Articles");
-                });
-
-            modelBuilder.Entity("RestApiCore.Model.User", b =>
+            modelBuilder.Entity("ServiceLayer.User", b =>
                 {
                     b.Navigation("Articles");
                 });
