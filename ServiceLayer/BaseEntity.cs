@@ -38,7 +38,54 @@ namespace ServiceLayer
             }
         }
 
-        public static async Task<List<T>> GetAll(bool includeFields = false)
+        public static async Task<T> GetByDeletedState(int id, bool includeFields = false)
+        {
+            using (var context = new DatabaseContext())
+            {
+                var set = context.Set<T>();
+
+                if (includeFields)
+                    return IncludeSet(set).FirstOrDefault(p => p.Id == id);
+
+                return await set.FindAsync(id);
+            }
+        }
+
+        public static bool GetActiveState(int id)
+        {
+            using (var context = new DatabaseContext())
+            {
+                var set = context.Set<T>();
+
+                var currentType = typeof(T);
+
+                if (!currentType.GetInterfaces().Contains(typeof(INonActive)))
+                    return false;
+
+                var obj = IncludeSet(set).FirstOrDefault(p => p.Id == id && (p as INonActive).IsActive == true);
+                return obj != null;
+
+            }
+        }
+
+        public static bool GetDeleteState(int id)
+        {
+            using (var context = new DatabaseContext())
+            {
+                var set = context.Set<T>();
+
+                var currentType = typeof(T);
+
+                if (!currentType.GetInterfaces().Contains(typeof(INonDeletable)))
+                    return false;
+
+                var obj = IncludeSet(set).FirstOrDefault(p => p.Id == id && (p as INonDeletable).IsDeleted == true);
+                return obj != null;
+
+            }
+        }
+
+        public static async Task<List<T>> GetAllData(bool includeFields = false)
         {
             using (var context = new DatabaseContext())
             {
@@ -48,82 +95,6 @@ namespace ServiceLayer
                     return await IncludeSet(set).ToListAsync();
 
                 return await set.ToListAsync();
-            }
-        }
-        public static async Task<List<T>> GetAll(QueryParameters queryParameters, bool includeFields = false)
-        {
-            using (var context = new DatabaseContext())
-            {
-                var set = context.Set<T>();
-
-                if (includeFields)
-                    return await IncludeSet(set)
-                        .Skip(queryParameters.Size * (queryParameters.Page - 1))
-                        .Take(queryParameters.Size).ToListAsync();
-
-                return await set
-                    .Skip(queryParameters.Size * (queryParameters.Page - 1))
-                   .Take(queryParameters.Size).ToListAsync();
-            }
-        }
-
-        public static IQueryable<T> GetAllIQ(bool includeFields = false)
-        {
-            using (var context = new DatabaseContext())
-            {
-                var set = context.Set<T>();
-
-                if (includeFields)
-                    return IncludeSet(set);
-
-                return set;
-            }
-        }
-
-        public static async Task<List<T>> GetAllDeleted(bool includeFields = false)
-        {
-
-            var currentType = typeof(T);
-            if (!currentType.GetInterfaces().Contains(typeof(INonDeletable)))
-                throw new Exception("Not a deletable class");
-
-            using (var context = new DatabaseContext())
-            {
-                var set = context.Set<T>();
-
-
-                if (includeFields)
-                {
-                    IncludeSet(set).Where(p => (p as INonDeletable).IsDeleted == true).ToList();
-                }
-
-                var query = set.Where(p => (p as INonDeletable).IsDeleted == true);
-
-                return await query.ToListAsync();
-            }
-        }
-
-
-        public static IQueryable<T> GetAllDeletedIQ(bool includeFields = false)
-        {
-
-            var currentType = typeof(T);
-            if (!currentType.GetInterfaces().Contains(typeof(INonDeletable)))
-                throw new Exception("Not a deletable class");
-
-            using (var context = new DatabaseContext())
-            {
-                var set = context.Set<T>();
-
-
-                if (includeFields)
-                {
-                    IncludeSet(set).Where(p => (p as INonDeletable).IsDeleted == true).ToList();
-                }
-
-                var query = set.Where(p => (p as INonDeletable).IsDeleted == true);
-
-                return query;
             }
         }
 
@@ -140,12 +111,17 @@ namespace ServiceLayer
 
 
                 if (includeFields)
-                    return await IncludeSet(set).Where(p => (p as INonDeletable).IsDeleted == false).ToListAsync();
+                    return await IncludeSet(set)
+                        .Where(p => (p as INonDeletable).IsDeleted == false)
+                        .ToListAsync();
 
-                return await set.Where(p => (p as INonDeletable).IsDeleted == false).ToListAsync();
+                return await set
+                    .Where(p => (p as INonDeletable).IsDeleted == false)
+                    .ToListAsync();
 
             }
         }
+
         public static async Task<List<T>> GetAllNonDeleted(QueryParameters queryParameters, bool includeFields = false)
         {
 
@@ -174,7 +150,55 @@ namespace ServiceLayer
             }
         }
 
-        public static IQueryable<T> GetAllNonDeletedIQ(QueryParameters queryParameters, bool includeFields = false)
+        public static async Task<List<T>> GetAllActive(bool includeFields = false)
+        {
+            var currentType = typeof(T);
+            if (!currentType.GetInterfaces().Contains(typeof(INonDeletable)))
+                throw new Exception("Not a deletable class");
+            if (!currentType.GetInterfaces().Contains(typeof(INonActive)))
+                throw new Exception("Not Has IsActive attribute");
+
+            using (var context = new DatabaseContext())
+            {
+                var set = context.Set<T>();
+
+                if (includeFields)
+                    return await IncludeSet(set)
+                        .Where(p => (p as INonDeletable).IsDeleted == false && (p as INonActive).IsActive == true)
+                        .ToListAsync();
+
+                return await set
+                    .Where(p => (p as INonDeletable).IsDeleted == false && (p as INonActive).IsActive == true)
+                    .ToListAsync(); ;
+            }
+        }
+
+        public static async Task<List<T>> GetAllActive(QueryParameters queryParameters, bool includeFields = false)
+        {
+            var currentType = typeof(T);
+            if (!currentType.GetInterfaces().Contains(typeof(INonDeletable)))
+                throw new Exception("Not a deletable class");
+            if (!currentType.GetInterfaces().Contains(typeof(INonActive)))
+                throw new Exception("Not Has IsActive attribute");
+
+            using (var context = new DatabaseContext())
+            {
+                var set = context.Set<T>();
+
+                if (includeFields)
+                    return await IncludeSet(set)
+                        .Where(p => (p as INonDeletable).IsDeleted == false && (p as INonActive).IsActive == true)
+                        .Skip(queryParameters.Size * (queryParameters.Page - 1))
+                        .Take(queryParameters.Size).ToListAsync();
+
+                return await set
+                    .Where(p => (p as INonDeletable).IsDeleted == false && (p as INonActive).IsActive == true)
+                    .Skip(queryParameters.Size * (queryParameters.Page - 1))
+                    .Take(queryParameters.Size).ToListAsync();
+            }
+        }
+
+        public static async Task<List<T>> GetAllDeleted(bool includeFields = false)
         {
 
             var currentType = typeof(T);
@@ -187,12 +211,16 @@ namespace ServiceLayer
 
 
                 if (includeFields)
-                    return IncludeSet(set).Where(p => (p as INonDeletable).IsDeleted == false);
+                {
+                    IncludeSet(set).Where(p => (p as INonDeletable).IsDeleted == true).ToList();
+                }
 
-                return set.Where(p => (p as INonDeletable).IsDeleted == false);
+                var query = set.Where(p => (p as INonDeletable).IsDeleted == true);
 
+                return await query.ToListAsync();
             }
         }
+
         public static async Task<bool> Insert(T data)
         {
             using (var context = new DatabaseContext())
@@ -238,75 +266,6 @@ namespace ServiceLayer
             }
 
         }
-        public static IQueryable<T> FindAllIQ(Expression<Func<T, bool>> match, bool includeFields = false)
-        {
-            using (var context = new DatabaseContext())
-            {
-                try
-                {
-                    var set = context.Set<T>();
-
-                    if (includeFields)
-                        return IncludeSet(set).Where(match);
-
-                    return set.Where(match);
-                }
-                catch (Exception)
-                {
-                    //        throw;
-                    return null;
-
-                }
-
-            }
-
-        }
-
-        //public static List<T> FindAllWithSpeceficFieldLoaded<TProperty>(Expression<Func<T, bool>> match, Expression<Func<T, TProperty>> speceficField) where TProperty : BaseEntity<TProperty>
-        //{
-        //    using (var context = new DatabaseContext())
-        //    {
-        //        try
-        //        {
-        //            var set = context.Set<T>();
-
-
-        //            return set.Include(speceficField).Where(match).ToList();
-        //        }
-        //        catch (Exception)
-        //        {
-        //            //     throw;
-        //            return null;
-
-        //        }
-
-        //    }
-
-        //}
-
-        //public static IQueryable<T> FindAllWithSpeceficFieldLoadedIQ<TProperty>(Expression<Func<T, bool>> match, Expression<Func<T, TProperty>> speceficField) where TProperty : BaseEntity<TProperty>
-        //{
-        //    using (var context = new DatabaseContext())
-        //    {
-        //        try
-        //        {
-        //            var set = context.Set<T>();
-
-
-        //            return set.Include(speceficField).Where(match);
-        //        }
-        //        catch (Exception)
-        //        {
-        //            //     throw;
-        //            return null;
-
-        //        }
-
-        //    }
-
-        //}
-
-
 
         public static async Task<T> FindFirstOrDefault(Expression<Func<T, bool>> match, bool includeFields = false)
         {
@@ -361,6 +320,8 @@ namespace ServiceLayer
 
         }
 
+
+
         public static async Task<bool> Delete(T entity)
         {
             using (var context = new DatabaseContext())
@@ -369,6 +330,40 @@ namespace ServiceLayer
                 {
 
                     T current = await context.Set<T>().FindAsync(entity.Id);
+
+                    if (current == null)
+                        return false;
+
+                    if (current is INonDeletable)
+                    {
+                        ((INonDeletable)current).IsDeleted = true;
+                        await context.SaveChangesAsync();
+                        return true;
+                    }
+
+                    //-- This code delete user data from database if it has not IsDeleted attribute.
+                    //-- due to the fact that delete rule is "cascade",
+                    //-- it also delete all related data in others tables.
+                    context.Set<T>().Remove(current);
+                    return await context.SaveChangesAsync() == 1;
+                }
+                catch (Exception)
+                {
+                    //       throw;
+                    return false;
+
+                }
+
+            }
+        }
+        public static async Task<bool> Delete(int Id)
+        {
+            using (var context = new DatabaseContext())
+            {
+                try
+                {
+
+                    T current = await context.Set<T>().FindAsync(Id);
 
                     if (current == null)
                         return false;
@@ -408,6 +403,37 @@ namespace ServiceLayer
 
             }
 
+        }
+
+
+        public static async Task<bool> ChangeActivation(int Id)
+        {
+            using (var context = new DatabaseContext())
+            {
+                try
+                {
+                    T current = await context.Set<T>().FindAsync(Id);
+
+                    if (current == null)
+                        return false;
+
+                    if (current is INonActive)
+                    {
+                        (current as INonActive).IsActive = !(current as INonActive).IsActive;
+                        await context.SaveChangesAsync();
+                        return true;
+                    }
+
+                    return false;
+                }
+                catch (Exception)
+                {
+                    //       throw;
+                    return false;
+
+                }
+
+            }
         }
 
 

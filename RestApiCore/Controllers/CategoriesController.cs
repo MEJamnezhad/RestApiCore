@@ -9,48 +9,144 @@ namespace RestApiCore.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-      //  [EnableCors]
-        [HttpGet]
-        public IActionResult Get()
-        {
-            using (var context = new DatabaseContext())
-            {
-                var cats = context.Categories.ToList();
-                return Ok(cats);
 
-            }
+
+        [HttpGet]
+        public async Task<IActionResult> Get([FromQuery] QueryParameters queryParameters)
+        {
+            return Ok(await ServiceLayer.Category.GetAllActive(queryParameters));
+        }
+
+
+        [HttpGet("all")]
+        public async Task<ActionResult<Category>> GetAll()
+        {
+            return Ok(await ServiceLayer.Category.GetAllNonDeleted());
+        }
+
+        [HttpGet("alld")]
+        public async Task<ActionResult<Category>> GetAllDeleted()
+        {
+            return Ok(await ServiceLayer.Category.GetAllDeleted());
         }
 
 
         [HttpGet("{Id}")]
-        public IActionResult Get(int Id)
+        public async Task<IActionResult> GetActiveCategory(int Id)
         {
-            using (var context = new DatabaseContext())
+            Category category = await ServiceLayer.Category.Get(Id);
+            if (category != null && category.IsActive == true)
             {
-                var cat = context.Categories.Find(Id);
-                if (cat != null)
-                {
-                    return Ok(cat);
-                }
-                return NotFound();
+                return Ok(category);
             }
+            return NotFound();
         }
+
+
+        [HttpGet("act/{Id}")]
+        public async Task<IActionResult> GetCategory(int Id)
+        {
+            Category category = await ServiceLayer.Category.Get(Id);
+            if (category != null)
+            {
+                return Ok(category);
+            }
+            return NotFound();
+        }
+
+
+        //    URL:  ~/api/Categorys/search/{Text}
+        [HttpGet("search/{text}")]
+        public async Task<IActionResult> Get(string text)
+        {
+            var categorys = await ServiceLayer.Category.FindAll(p => p.Name.Contains(text) && p.IsDeleted == false);
+            if (categorys.Count > 0)
+            {
+                return Ok(categorys);
+            }
+            return NotFound();
+        }
+
+
+        //    URL:   localhost:5186/api/Categorys/search2?text={text Value}
+        [HttpGet("search")]
+        public async Task<IActionResult> GetByFirstnameAndLastname([FromQuery] string text)
+        {
+            var categorys = await ServiceLayer.Category.FindAll(p => p.Name.Contains(text) && p.IsDeleted == false);
+            if (categorys.Count > 0)
+            {
+                return Ok(categorys);
+            }
+            return NotFound();
+        }
+
 
 
         [HttpPost]
-        public IActionResult AddPosition(Category cat)
+        public async Task<IActionResult> AddCategory(Category category)
         {
             if (ModelState.IsValid)
             {
-                using (var context = new DatabaseContext())
+                try
                 {
-                    context.Categories.Add(cat);
-                    context.SaveChanges();
-                    return Created("The position added", cat);
+                    bool added = await ServiceLayer.Category.Insert(category);
+                    if (added)
+                    {
+                        return Created("The Category added", category);  // With message (Show message in value of Location HTTP Header Key)
+                        // Or
+                        //return CreatedAtAction("get", new {id = Category.Id},Category);  // Without message and call get method with input value (Category.id)
+                    }
                 }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("Exception", ex.Message);
+                    return StatusCode(500, ModelState);
+                }
+
             }
             return BadRequest("The Data is wrong");
         }
+
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateCategory(Category category)
+        {
+            bool changed = await ServiceLayer.Category.Update(category, category.Id);
+            if (changed == true)
+            {
+                return Ok(category);
+                // Or   return Ok();  Or    return NoContent(); 
+            }
+            return BadRequest();
+        }
+
+
+        [HttpPatch("{Id}")]   // Or
+                              //[HttpPut("{Id}")]
+        public async Task<IActionResult> ChangeActivation(int Id)
+        {
+            bool changed = await ServiceLayer.Category.ChangeActivation(Id);
+            if (changed == true)
+            {
+                return Ok();
+                //   Or  return NoContent(); 
+            }
+            return BadRequest();
+        }
+
+
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult> DeleteCategory(int Id)
+        {
+            bool deleted = await ServiceLayer.Category.Delete(Id);
+            if (deleted == true)
+            {
+                return Ok();
+                //   Or  return NoContent(); 
+            }
+            return BadRequest();
+        }
+
 
     }
 }
