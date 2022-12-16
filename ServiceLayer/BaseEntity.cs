@@ -73,7 +73,6 @@ namespace ServiceLayer
 
                 var obj = context.Set<T>().FirstOrDefault(p => p.Id == id && (p as INonDeletable).IsDeleted == true);
                 return obj != null;
-
             }
         }
 
