@@ -10,7 +10,6 @@ using System.Reflection;
 
 namespace RestApiCore.Controllers
 {
-    //  [EnableCors("YourNamePolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -34,6 +33,12 @@ namespace RestApiCore.Controllers
         public async Task<ActionResult<User>> GetAll()
         {
             return Ok(await ServiceLayer.User.GetAllNonDeleted());
+        }
+
+        [HttpGet("count")]
+        public async Task<ActionResult<User>> GetCount()
+        {
+            return Ok(await ServiceLayer.User.Count());
         }
 
         [HttpGet("alld")]
@@ -60,7 +65,7 @@ namespace RestApiCore.Controllers
         public async Task<IActionResult> Get(int Id)
         {
             User user = await ServiceLayer.User.Get(Id);
-            if (user != null && user.IsDeleted == false)
+            if (user != null)
             {
                 return Ok(user);
             }
@@ -71,7 +76,7 @@ namespace RestApiCore.Controllers
 
 
         [HttpGet("Details")]
-        public async Task<IActionResult> GetDetails()
+        public IActionResult GetDetails()
         {
             return Ok( ServiceLayer.User.GetAllNonDeleted().Result.Select(p => new
             {

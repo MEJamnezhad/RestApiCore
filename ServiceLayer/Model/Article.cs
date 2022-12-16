@@ -15,11 +15,11 @@ namespace ServiceLayer
         public string Text { get; set; } = String.Empty;
 
         public string Picture { get; set; } = String.Empty;
+       
         public string DocumentPath { get; set; } = String.Empty;
-
-
+        
         public bool IsActive { get; set; } = true;
-
+        
         public bool IsDeleted { get; set; } = false;
 
         public int Visit { get; set; } = 0;
@@ -37,7 +37,6 @@ namespace ServiceLayer
         public virtual User Writer { get; set; }
 
 
-
         #region Helper
 
         public static async Task<List<Article>> GetActiveArticles(int categoryId)
@@ -48,9 +47,8 @@ namespace ServiceLayer
                 {
                     return await context.Articles.Where(p => p.CategoryId == categoryId && p.IsDeleted == false && p.IsActive == true).ToListAsync();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    //        throw;
                     return null;
                 }
             }
@@ -80,9 +78,8 @@ namespace ServiceLayer
 
                     return articles.Take(top).ToList();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    //        throw;
                     return null;
                 }
             }

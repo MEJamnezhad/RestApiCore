@@ -102,7 +102,7 @@ namespace RestApiCore.Controllers
         [HttpGet("general/{top}")]
         public async Task<IActionResult> GetTopics(int top = 0)
         {
-            return Ok(ServiceLayer.Article.GetTop(top).Result.Select(p => new
+            return  Ok(ServiceLayer.Article.GetTop(top).Result.Select(p => new
             {
                 p.Id,
                 p.Title,
