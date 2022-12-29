@@ -14,6 +14,13 @@ namespace RestApiCore.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private ILogger<UsersController> _logger;
+
+        public UsersController(ILogger<UsersController> logger)
+        {
+            _logger = logger;
+            _logger.LogDebug(1, "NLog injected into UsersController");
+        }
 
         //public UsersController()
         //{
@@ -69,7 +76,8 @@ namespace RestApiCore.Controllers
             {
                 return Ok(user);
             }
-            return NotFound();
+            _logger.LogInformation($"The city with Id {Id} was not found");
+            return NotFound("User Invalid");
 
         }
 
@@ -78,7 +86,7 @@ namespace RestApiCore.Controllers
         [HttpGet("Details")]
         public IActionResult GetDetails()
         {
-            return Ok( ServiceLayer.User.GetAllNonDeleted().Result.Select(p => new
+            return Ok(ServiceLayer.User.GetAllNonDeleted().Result.Select(p => new
             {
                 p.Id,
                 p.Email,
@@ -223,7 +231,7 @@ namespace RestApiCore.Controllers
             }
             return BadRequest();
         }
-      
+
     }
 }
 

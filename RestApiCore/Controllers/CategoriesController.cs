@@ -104,7 +104,7 @@ namespace RestApiCore.Controllers
                 }
 
             }
-            return BadRequest("The Data is wrong");
+            return NoContent();
         }
 
 
@@ -114,10 +114,10 @@ namespace RestApiCore.Controllers
             bool changed = await ServiceLayer.Category.Update(category, category.Id);
             if (changed == true)
             {
-                return Ok(category);
-                // Or   return Ok();  Or    return NoContent(); 
+                return Ok();
+                //   Or   return Accepted(); 
             }
-            return BadRequest();
+            return NoContent();
         }
 
 
@@ -129,9 +129,9 @@ namespace RestApiCore.Controllers
             if (changed == true)
             {
                 return Ok();
-                //   Or  return NoContent(); 
+                //   Or   return Accepted(); 
             }
-            return BadRequest();
+            return NoContent();
         }
 
 
@@ -142,9 +142,33 @@ namespace RestApiCore.Controllers
             if (deleted == true)
             {
                 return Ok();
-                //   Or  return NoContent(); 
+                //   Or   return Accepted(); 
             }
-            return BadRequest();
+            return NoContent();
+        }
+        
+        [HttpDelete]
+        public async Task<IActionResult> DeleteCategory(Category cat)
+        {
+            bool deleted = await ServiceLayer.Category.Delete(cat);
+            if (deleted == true)
+            {
+                return Ok();
+                //   Or   return Accepted(); 
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("remove/{Id}")]
+        public async Task<IActionResult> RemoveCategory(int Id)
+        {
+            bool deleted = await ServiceLayer.Category.Delete(Id);
+            if (deleted == true)
+            {
+                return Ok();
+                //   Or   return Accepted(); 
+            }
+            return NoContent();
         }
 
 

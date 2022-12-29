@@ -353,6 +353,49 @@ namespace ServiceLayer
             }
         }
 
+        public static async Task<bool> Remove(T entity)
+        {
+            using (var context = new DatabaseContext())
+            {
+                try
+                {
+                    T current = await context.Set<T>().FindAsync(entity.Id);
+
+                    if (current == null)
+                        return false;
+                    
+                    context.Set<T>().Remove(current);
+                    return await context.SaveChangesAsync() == 1;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+
+            }
+        }
+
+        public static async Task<bool> Remove(int Id)
+        {
+            using (var context = new DatabaseContext())
+            {
+                try
+                {
+                    T current = await context.Set<T>().FindAsync(Id);
+
+                    if (current == null)
+                        return false;
+
+                    context.Set<T>().Remove(current);
+                    return await context.SaveChangesAsync() == 1;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+        }
+
         public static async Task<int> Count()
         {
             using (var context = new DatabaseContext())
